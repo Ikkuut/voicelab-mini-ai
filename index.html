@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101b35">
+<title>VoiceLab Mini AI</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b1224;
+  color: #ffffff;
+}
+
+header {
+  background: linear-gradient(135deg, #172554, #4338ca);
+  padding: 25px 18px;
+  text-align: center;
+  border-radius: 0 0 25px 25px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 27px;
+}
+
+header p {
+  color: #dbeafe;
+  font-size: 14px;
+}
+
+.container {
+  max-width: 650px;
+  margin: 20px auto;
+  padding: 0 15px;
+}
+
+.card {
+  background: #16213b;
+  padding: 20px;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  border: 1px solid #293957;
+}
+
+h2 {
+  font-size: 19px;
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin: 15px 0 8px;
+  font-size: 14px;
+}
+
+textarea, select, input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #405071;
+  border-radius: 10px;
+  background: #0b1224;
+  color: white;
+  font-size: 15px;
+}
+
+textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+button {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.primary {
+  background: #6366f1;
+  color: white;
+}
+
+.secondary {
+  background: #263653;
+  color: white;
+  border: 1px solid #405071;
+}
+
+button:active {
+  opacity: 0.8;
+}
+
+.status {
+  margin-top: 12px;
+  color: #93c5fd;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+footer {
+  text-align: center;
+  color: #94a3b8;
+  padding: 15px;
+  font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🎙️ VoiceLab Mini AI</h1>
+  <p>Studio suara dan konten kreatif dalam satu aplikasi</p>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>🎤 Text to Speech</h2>
+    <p>Ubah tulisan menjadi suara menggunakan mesin suara browser.</p>
+
+    <label for="teks">Masukkan teks Anda</label>
+    <textarea id="teks" maxlength="5000"
+      placeholder="Tuliskan naskah yang ingin dibacakan...">Assalamu'alaikum. Selamat datang di VoiceLab Mini AI. Mari membuat konten yang kreatif dan menarik.</textarea>
+
+    <label for="suara">Pilih suara</label>
+    <select id="suara">
+      <option value="">Memuat pilihan suara...</option>
+    </select>
+
+    <label for="kecepatan">Kecepatan bicara</label>
+    <input id="kecepatan" type="range"
+      min="0.6" max="1.4" step="0.1" value="1">
+
+    <p id="nilaiKecepatan">Kecepatan: 1,0x</p>
+
+    <button class="primary" id="putar">▶ Putar Suara</button>
+    <button class="secondary" id="berhenti">■ Hentikan Suara</button>
+
+    <div class="status" id="status" aria-live="polite">
+      Siap digunakan. Suara bergantung pada browser dan perangkat.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>✍️ AI Content Writer</h2>
+    <p>Siapkan ide naskah sebelum kita mengintegrasikan AI penulis.</p>
+
+    <label for="topik">Topik konten</label>
+    <input id="topik" type="text"
+      placeholder="Contoh: promosi keripik pisang">
+
+    <button class="secondary" id="buatNaskah">
+      Buat Kerangka Naskah
+    </button>
+
+    <div class="status" id="statusNaskah">
+      Fitur awal ini membuat kerangka sederhana tanpa layanan AI eksternal.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>🛍️ Product to Speech</h2>
+    <p>Siapkan informasi produk untuk membuat narasi promosi.</p>
+
+    <label for="produk">Nama produk</label>
+    <input id="produk" type="text"
+      placeholder="Contoh: Keripik Pisang Lumajang">
+
+    <label for="keunggulan">Keunggulan produk</label>
+    <textarea id="keunggulan"
+      placeholder="Tuliskan keunggulan produk..."></textarea>
+
+    <button class="secondary" id="buatPromosi">
+      Buat Naskah Promosi
+    </button>
+  </section>
+
+</main>
+
+<footer>
+  VoiceLab Mini AI · Versi awal
+</footer>
+
+<script>
+const teks = document.getElementById("teks");
+const suara = document.getElementById("suara");
+const status = document.getElementById("status");
+const kecepatan = document.getElementById("kecepatan");
+
+function muatSuara() {
+  if (!("speechSynthesis" in window)) {
+    suara.innerHTML = '<option value="">Tidak didukung</option>';
+    status.textContent =
+      "Browser ini tidak mendukung sintesis suara. Coba Chrome terbaru.";
+    return;
+  }
+
+  const daftar = speechSynthesis.getVoices();
+  suara.innerHTML = "";
+
+  if (daftar.length === 0) {
+    suara.innerHTML =
+      '<option value="">Suara belum tersedia</option>';
+    return;
+  }
+
+  daftar.forEach((v, i) => {
+    const opsi = document.createElement("option");
+    opsi.value = i;
+    opsi.textContent =
+      v.name + " (" + v.lang + ")" +
+      (v.lang.toLowerCase().startsWith("id") ? " — Indonesia" : "");
+    suara.appendChild(opsi);
+  });
+
+  const indonesia = daftar.findIndex(v =>
+    v.lang.toLowerCase().startsWith("id")
+  );
+
+  if (indonesia >= 0) suara.value = indonesia;
+}
+
+if ("speechSynthesis" in window) {
+  speechSynthesis.onvoiceschanged = muatSuara;
+  muatSuara();
+}
+
+kecepatan.addEventListener("input", () => {
+  document.getElementById("nilaiKecepatan").textContent =
+    "Kecepatan: " +
+    Number(kecepatan.value).toLocaleString("id-ID", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1
+    }) + "x";
+});
+
+document.getElementById("putar").addEventListener("click", () => {
+  if (!("speechSynthesis" in window)) {
+    status.textContent = "Browser tidak mendukung fitur suara.";
+    return;
+  }
+
+  const isi = teks.value.trim();
+
+  if (!isi) {
+    status.textContent = "Silakan masukkan teks terlebih dahulu.";
+    return;
+  }
+
+  speechSynthesis.cancel();
+
+  const ucapan = new SpeechSynthesisUtterance(isi);
+  const daftar = speechSynthesis.getVoices();
+  const pilihan = daftar[Number(suara.value)];
+
+  if (pilihan) {
+    ucapan.voice = pilihan;
+    ucapan.lang = pilihan.lang;
+  } else {
+    ucapan.lang = "id-ID";
+  }
+
+  ucapan.rate = Number(kecepatan.value);
+
+  ucapan.onstart = () => {
+    status.textContent = "Sedang memutar suara...";
+  };
+
+  ucapan.onend = () => {
+    status.textContent =
+      "Selesai. Ini adalah suara browser, belum berupa file MP3.";
+  };
+
+  ucapan.onerror = (e) => {
+    status.textContent =
+      "Suara gagal diputar: " + e.error +
+      ". Coba pilih suara lain atau periksa pengaturan perangkat.";
+  };
+
+  speechSynthesis.speak(ucapan);
+});
+
+document.getElementById("berhenti").addEventListener("click", () => {
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  status.textContent = "Pemutaran dihentikan.";
+});
+
+document.getElementById("buatNaskah").addEventListener("click", () => {
+  const topik = document.getElementById("topik").value.trim();
+  const hasil = document.getElementById("statusNaskah");
+
+  if (!topik) {
+    hasil.textContent = "Silakan masukkan topik konten terlebih dahulu.";
+    return;
+  }
+
+  teks.value =
+    "Halo semuanya! Kali ini kita akan membahas " + topik +
+    ". Simak informasi berikut sampai selesai. " +
+    "Semoga bermanfaat dan jangan lupa bagikan kepada teman-teman Anda.";
+
+  hasil.textContent =
+    "Kerangka naskah sudah dibuat. Anda dapat mengeditnya dan menekan Putar Suara.";
+  document.getElementById("teks").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+});
+
+document.getElementById("buatPromosi").addEventListener("click", () => {
+  const produk = document.getElementById("produk").value.trim();
+  const keunggulan = document.getElementById("keunggulan").value.trim();
+
+  if (!produk) {
+    alert("Masukkan nama produk terlebih dahulu.");
+    return;
+  }
+
+  teks.value =
+    "Sedang mencari produk yang menarik? Kenalkan, " + produk + ". " +
+    (keunggulan ? keunggulan + ". " : "") +
+    "Yuk, kenali produknya lebih lanjut. " +
+    "Hubungi penjual untuk mengetahui informasi dan ketersediaannya.";
+
+  document.getElementById("teks").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  document.getElementById("status").textContent =
+    "Naskah promosi dibuat. Periksa teks, lalu tekan Putar Suara.";
+});
+</script>
+
+</body>
+      </html>
